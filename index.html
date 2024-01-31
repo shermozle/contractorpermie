@@ -29,11 +29,21 @@
 		<link rel="apple-touch-icon-precomposed" href="ico/Nuvola_apps_kcalc_128_128.png">
 		<link rel="shortcut icon" href="ico/favicon.png">
 		<!-- Icon image from David Vignoni under GNU Public License http://www.icon-king.com/projects/nuvola/ -->
-		<script src='//d3c3cq33003psk.cloudfront.net/opentag-50376-435621.js' async defer></script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NKH9CR8');</script>
+<!-- End Google Tag Manager -->
+		<meta name="google-site-verification" content="FPm2dPKx77pTd0CoT1IxY19bd3XXZ3zbRDXRTtGvr5k" />
 	</head>
 
 	<body>
-
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NKH9CR8"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 		<div class="navbar navbar-inverse navbar-fixed-top">
 			<div class="navbar-inner">
 				<div class="container">
@@ -59,10 +69,25 @@
 			<div class="hero-unit">
 				
 				<p>This calculator helps you compare "package" or "gross" salaries, daily contract rates and their equivalent standard salary number.</p>
+				<p>Updated for 2014 public holidays and the increase of super to 9.5% for financial years 2014-2017.</p>
 
 				<!-- Button to trigger modal -->
 				<center><a href="#myModal" role="button" class="btn btn-success btn-large fade in" data-toggle="modal" id="listsubscribe" style="display:none">Sign up for occasional updates</a></center>
-				 
+				 <script src="http://coinwidget.com/widget/coin.js"></script>
+				<script>
+				CoinWidgetCom.go({
+					wallet_address: "1CWzc5jUVYzFqisaF3uQog3GA4HZpTNesH"
+					, currency: "bitcoin"
+					, counter: "count"
+					, alignment: "bl"
+					, qrcode: true
+					, auto_show: false
+					, lbl_button: "Donate"
+					, lbl_address: "My Bitcoin Address:"
+					, lbl_count: "donations"
+					, lbl_amount: "BTC"
+				});
+				</script>
 				<!-- Modal -->
 				<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 					<div class="modal-header">
@@ -105,20 +130,22 @@
 							<label><b>Standard annual salary</b></label>
 							<input type="text" placeholder="70000" id="annualex" rel="tooltip" title="What most people talk about as their annual salary, ex super and ex tax" />
 							<label>"Package" annual salary</label>
-							<input type="text" placeholder="76300" id="annualinc" rel="tooltip" title="What the recruiter will quote you as 'package', inc super ex tax" />
+							<input type="text" placeholder="76650" id="annualinc" rel="tooltip" title="What the recruiter will quote you as 'package', inc super ex tax" />
 							<label>Daily contract rate (inc superannuation)</label>
-							<input type="text" placeholder="346.82" id="dailyinc" rel="toolip" title="Daily rate net of the standard days off in 'Assumptions'" />
+							<input type="text" placeholder="337.67" id="dailyinc" rel="toolip" title="Daily rate net of the standard days off in 'Assumptions'" />
 						</fieldset>
 					</div>
 					<div class="span5">
 						<fieldset>
 							<legend>Assumptions</legend>
+							<label>Days worked per week</label>
+							<input type="text" value="5" id="daysperweek" rel="tooltip" title="Change for part-timers">
 							<label>Weekdays in year</label>
-							<input type="text" value="261" id="weekdays" rel="tooltip" title="Based on 2013">
+							<input type="text" value="261" id="weekdays" rel="tooltip" title="52 times days worked per week, so not 100% accurate">
 							<label>Public holidays</label>
-							<input type="text" value="9" id="pubhols" rel="tooltip" title="Based on NSW weekday public holidays for 2013">
+							<input type="text" value="10" id="pubhols" rel="tooltip" title="Based on NSW weekday public holidays for 2014">
 							<label>Annual leave</label>
-							<input type="text" value="20" id="annualleave" rel="tooltip" title="Four weeks' holidays">
+							<input type="text" value="20" id="annualleave" rel="tooltip" title="Four weeks' holidays if you work five days a week">
 							<label>Sick leave</label>
 							<input type="text" value="5" id="sickleave" rel="tooltip" title="Don't get sick more than a week">
 							<label><b>Net days worked</b></label>
@@ -130,7 +157,7 @@
 			</div>
 			<div class="row">
 				<p>Most people in Australia quote their salary excluding tax and superannuation. Recruiters and employers like to quote it inclusive of superannuation because it sounds higher. When you're looking at contract daily rates, it's standard to include super.This calculator helps you compare "package" and "gross" salaries, and daily contract rates, with their equivalent standard salary number.</p>
-				<p>It like to always compare anything that's being offered with a "standard" salary number. With contracts, you tend to get paid more because leave, public holidays and sick leave aren't covered. This calculator accounts for that.</p>
+				<p>I like to always compare anything that's being offered with a "standard" salary number. With contracts, you tend to get paid more because leave, public holidays and sick leave aren't covered. This calculator accounts for that.</p>
 			</div>
 			<div class="row">
 				<!-- AddThis Button BEGIN -->
@@ -151,45 +178,55 @@
 		<!-- Le javascript
 		================================================== -->
 		<!-- Placed at the end of the document so the pages load faster -->
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script src="js/bootstrap.js"></script>
 		<script type="text/javascript">
 			$('input').change(function() {
 				$('#listsubscribe').fadeIn()
 				switch(this.id) {
 					case 'annualex':
-						$('#annualinc').val($('#annualex').val() * 1.09);
+						$('#annualinc').val($('#annualex').val() * 1.095);
 						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val());
 						_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'annualex']);
 						break;
 
 					case 'annualinc':
-						$('#annualex').val($('#annualinc').val() * 0.91);
+						$('#annualex').val($('#annualinc').val() * (1/1.095));
 						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val());
 						_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'annualinc']);
 						break;
 
 					case 'dailyinc':
 						$('#annualinc').val($('#dailyinc').val() * $('#daysworked').val());
-						$('#annualex').val($('#annualinc').val() * 0.91);
+						$('#annualex').val($('#annualinc').val() * (1/1.095));
 						_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'daysworked']);
 						break;
 
 					default:
 					_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'assumptions']);
 					// One of the assumptions changed
+					$('#weekdays').val($('#daysperweek').val() * 52);
+
+					// Calculate annual leave pro rata from 20, but no more than 20
+					if ($('#daysperweek').val() > 5) {
+						alert("You're really gonna work more than 5 days every week? That sucks!");
+						$('#annualleave').val(20);
+					} else {
+						$('#annualleave').val(Math.round(($('#daysperweek').val()/5)*20));
+					}
+
 					$('#daysworked').val(
 						$('#weekdays').val() - $('#pubhols').val() - $('#annualleave').val() - $('#sickleave').val()
 						// If they've already done a calculation in the top bit, recalculate
 					);
 					if ($('#annualex').val() !== '') {
 						$('#annualinc').val($('#dailyinc').val() * $('#daysworked').val());
-						$('#annualex').val($('#annualinc').val() * 0.91);
+						$('#annualex').val($('#annualinc').val() * (1/1.095));
 					}
 				}
 				if ($('#annualex').val() !== '') {
 					$('#annualex,#annualinc,#dailyinc').each(function() {
-						this.value = ((this.value * 1).toFixed(2));
+						this.value = ((this.value * 1).toFixed(0));
 					});
 				}
 
@@ -197,6 +234,5 @@
 		// Add the tooltips to the input fields
 		$('input').tooltip({'placement' : 'right'})
 		</script>
-
 	</body>
 </html>
