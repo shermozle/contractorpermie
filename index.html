@@ -69,7 +69,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			<div class="hero-unit">
 				
 				<p>This calculator helps you compare "package" or "gross" salaries, daily contract rates and their equivalent standard salary number.</p>
-				<p>Updated for 2014 public holidays and the increase of super to 9.5% for financial years 2014-2017.</p>
+				<p>Updated for 2024 public holidays (including bank holiday) and the increase of super to 11.0% for financial years 2023-2024. <a href="https://www.ato.gov.au/tax-rates-and-codes/key-superannuation-rates-and-thresholds/super-guarantee">Super percentage is increasing until FY2028</a></p>
 
 				<!-- Button to trigger modal -->
 				<center><a href="#myModal" role="button" class="btn btn-success btn-large fade in" data-toggle="modal" id="listsubscribe" style="display:none">Sign up for occasional updates</a></center>
@@ -131,7 +131,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 							<input type="text" placeholder="70000" id="annualex" rel="tooltip" title="What most people talk about as their annual salary, ex super and ex tax" />
 							<label>"Package" annual salary</label>
 							<input type="text" placeholder="76650" id="annualinc" rel="tooltip" title="What the recruiter will quote you as 'package', inc super ex tax" />
-							<label>Daily contract rate (inc superannuation)</label>
+							<label>Daily contract rate (inc superannuation, ex GST)</label>
 							<input type="text" placeholder="337.67" id="dailyinc" rel="toolip" title="Daily rate net of the standard days off in 'Assumptions'" />
 						</fieldset>
 					</div>
@@ -148,6 +148,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 							<input type="text" value="20" id="annualleave" rel="tooltip" title="Four weeks' holidays if you work five days a week">
 							<label>Sick leave</label>
 							<input type="text" value="5" id="sickleave" rel="tooltip" title="Don't get sick more than a week">
+							<label>Super percentage</label>
+							<input type="text" value="11.0" id="superannuation">
 							<label><b>Net days worked</b></label>
 							<input type="text" value="225" id="daysworked">
 						</fieldset>
@@ -183,27 +185,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		<script type="text/javascript">
 			$('input').change(function() {
 				$('#listsubscribe').fadeIn()
+				superannuation = 1.0 + $('#superannuation').val() / 100;
 				switch(this.id) {
 					case 'annualex':
-						$('#annualinc').val($('#annualex').val() * 1.095);
+						$('#annualinc').val($('#annualex').val() * superannuation);
 						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val());
-						_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'annualex']);
+						//_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'annualex']);
 						break;
 
 					case 'annualinc':
-						$('#annualex').val($('#annualinc').val() * (1/1.095));
+						$('#annualex').val($('#annualinc').val() * (1 / superannuation));
 						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val());
-						_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'annualinc']);
+						//_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'annualinc']);
 						break;
 
 					case 'dailyinc':
 						$('#annualinc').val($('#dailyinc').val() * $('#daysworked').val());
-						$('#annualex').val($('#annualinc').val() * (1/1.095));
-						_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'daysworked']);
+						$('#annualex').val($('#annualinc').val() * (1/superannuation));
+						//_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'daysworked']);
 						break;
 
 					default:
-					_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'assumptions']);
+					//_gaq.push(['_trackEvent', 'Forms', 'Contract or Permie', 'assumptions']);
 					// One of the assumptions changed
 					$('#weekdays').val($('#daysperweek').val() * 52);
 
@@ -221,7 +224,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 					);
 					if ($('#annualex').val() !== '') {
 						$('#annualinc').val($('#dailyinc').val() * $('#daysworked').val());
-						$('#annualex').val($('#annualinc').val() * (1/1.095));
+						$('#annualex').val($('#annualinc').val() * (1 / superannuation));
 					}
 				}
 				if ($('#annualex').val() !== '') {
