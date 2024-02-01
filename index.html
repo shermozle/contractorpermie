@@ -125,13 +125,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
 			$('input').change(function() {
-				$('#listsubscribe').fadeIn()
+				// Record the actually-entered field value before we format it down lower
+				fieldValue = this.value;
+
 				superannuation = 1.0 + $('#superannuation').val() / 100;
 
 				// Unformat before we do calculations
 				$('#annualex,#annualinc,#dailyinc').each(function() {
-						this.value = unformat(this.value);
-					});
+					this.value = unformat(this.value);
+				});
 
 				switch(this.id) {
 					case 'annualex':
@@ -175,6 +177,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						this.value = format((this.value * 1).toFixed(0));
 					});
 				}
+				window.dataLayer = window.dataLayer || [];
+				dataLayer.push({
+					'event': 'change',
+					'fieldChanged': this.id,
+					'fieldValue': fieldValue,
+					'annualex': $('#annualex').val(),
+					'annualinc': $('#annualinc').val(),
+					'dailyinc': $('#dailyinc').val(),
+					'daysperweek': $('#daysperweek').val(),
+					'weekdays': $('#weekdays').val(),
+					'pubhols': $('#pubhols').val(),
+					'sickleave': $('#sickleave').val(),
+					'superannuation': $('#superannuation').val(),
+					'daysworked': $('#daysworked').val()
+				})
 
 			});
 		// Add the tooltips to the input fields
