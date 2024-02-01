@@ -154,9 +154,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script src="js/bootstrap.js"></script>
 		<script type="text/javascript">
+			function format(input) {
+				return new Intl.NumberFormat('en-AU', {style: 'currency', currency: 'AUD', maximumSignificantDigits: 3}).format(input); 
+			}
+
+			function unformat(input) {
+				input = input.replace('$', '');
+				input = input.replace(/\,/g, '');
+				return parseInt(input);
+			}
+
+
 			$('input').change(function() {
 				$('#listsubscribe').fadeIn()
 				superannuation = 1.0 + $('#superannuation').val() / 100;
+
+				// Unformat before we do calculations
+				$('#annualex,#annualinc,#dailyinc').each(function() {
+						this.value = unformat(this.value);
+					});
+
 				switch(this.id) {
 					case 'annualex':
 						$('#annualinc').val($('#annualex').val() * superannuation);
@@ -196,7 +213,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				}
 				if ($('#annualex').val() !== '') {
 					$('#annualex,#annualinc,#dailyinc').each(function() {
-						this.value = ((this.value * 1).toFixed(0));
+						this.value = format((this.value * 1).toFixed(0));
 					});
 				}
 
