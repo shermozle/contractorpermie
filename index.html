@@ -188,12 +188,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 					'annualex_formatted': $('#annualex').val(),
 					'annualinc_formatted': $('#annualinc').val(),
 					'dailyinc_formatted': $('#dailyinc').val(),
-					'daysperweek': $('#daysperweek').val(),
-					'weekdays': $('#weekdays').val(),
-					'pubhols': $('#pubhols').val(),
-					'sickleave': $('#sickleave').val(),
-					'superannuation': $('#superannuation').val(),
-					'daysworked': $('#daysworked').val()
+					'daysperweek': ($('#daysperweek').val()) * 1,
+					'weekdays': ($('#weekdays').val() * 1),
+					'pubhols': ($('#pubhols').val() * 1),
+					'sickleave': ($('#sickleave').val() * 1),
+					'superannuation': ($('#superannuation').val() * 1),
+					'daysworked': ($('#daysworked').val() * 1)
 
 				})
 
