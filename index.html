@@ -41,7 +41,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script>
 (function() {
 	var _s = window.Statsig;
-	var statsigClient = new _s.StatsigClient('client-zO3RCgJ6Q5YKMdSWxzKk32e1BCGEUpEnUgqlSN5FUZ5', {});
+
+	// Generate a persistent stable ID so Statsig gates can target anonymous users.
+	// The SDK records a session ID internally but doesn't expose it in customIDs
+	// for gate evaluation unless we pass it explicitly.
+	var STABLE_ID_KEY = 'cp.stable_id';
+	var stableID = localStorage.getItem(STABLE_ID_KEY);
+	if (!stableID) {
+		stableID = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			var r = Math.random() * 16 | 0;
+			return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+		});
+		localStorage.setItem(STABLE_ID_KEY, stableID);
+	}
+
+	var statsigClient = new _s.StatsigClient('**************************************************', {
+		customIDs: { stableID: stableID }
+	});
 	_s.runStatsigSessionReplay(statsigClient);
 	_s.runStatsigAutoCapture(statsigClient);
 	window.__statsigReady = statsigClient.initializeAsync();
