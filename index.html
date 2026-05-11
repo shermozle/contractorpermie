@@ -35,6 +35,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-NKH9CR8');</script>
 <!-- End Google Tag Manager -->
+<!-- Statsig SDK -->
+<script src="https://unpkg.com/@statsig/js-client"></script>
+<script>
+(function() {
+	var statsigClient = new window.__STATSIG__.StatsigClient(
+		'client-zO3RCgJ6Q5YKMdSWxzKk32e1BCGEUpEnUgqlSN5FUZ5',
+		{}
+	);
+	statsigClient.initializeAsync();
+	window.statsigClient = statsigClient;
+})();
+</script>
+<!-- End Statsig SDK -->
 		<meta name="google-site-verification" content="FPm2dPKx77pTd0CoT1IxY19bd3XXZ3zbRDXRTtGvr5k" />
 	</head>
 
@@ -196,6 +209,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 					'daysworked': ($('#daysworked').val() * 1)
 
 				})
+
+				if (window.statsigClient) {
+					window.statsigClient.logEvent({
+						eventName: 'change',
+						metadata: {
+							'fieldChanged': String(this.id),
+							'fieldValue': String(fieldValue),
+							'annualex_unformatted': String(unformat($('#annualex').val())),
+							'annualinc_unformatted': String(unformat($('#annualinc').val())),
+							'dailyinc_unformatted': String(unformat($('#dailyinc').val())),
+							'annualex_formatted': String($('#annualex').val()),
+							'annualinc_formatted': String($('#annualinc').val()),
+							'dailyinc_formatted': String($('#dailyinc').val()),
+							'daysperweek': String($('#daysperweek').val() * 1),
+							'weekdays': String($('#weekdays').val() * 1),
+							'pubhols': String($('#pubhols').val() * 1),
+							'sickleave': String($('#sickleave').val() * 1),
+							'superannuation': String($('#superannuation').val() * 1),
+							'daysworked': String($('#daysworked').val() * 1)
+						}
+					});
+				}
 
 			});
 		// Add the tooltips to the input fields
