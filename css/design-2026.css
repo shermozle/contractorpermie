@@ -1,0 +1,275 @@
+/* ============================================================
+   Design 2026 — activated when html.design-2026 is present
+   ============================================================ */
+
+html.design-2026 body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f0f4f8;
+    color: #1a202c;
+    padding-top: 0 !important;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Navbar ---- */
+html.design-2026 .navbar {
+    position: static !important;
+    margin-bottom: 0;
+}
+
+html.design-2026 .navbar-inner {
+    background: #1a202c !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 32px;
+    min-height: 56px;
+}
+
+html.design-2026 .navbar .brand {
+    color: #fff !important;
+    text-shadow: none !important;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    padding: 18px 0;
+    line-height: 1;
+    float: none;
+    display: inline-block;
+}
+
+html.design-2026 .btn-navbar {
+    display: none !important;
+}
+
+/* ---- Container ---- */
+html.design-2026 .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+    float: none !important;
+    width: auto !important;
+}
+
+html.design-2026 h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 20px;
+    text-shadow: none;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+/* ---- Hero / intro card ---- */
+html.design-2026 .hero-unit {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    -webkit-border-radius: 12px;
+}
+
+html.design-2026 .hero-unit p {
+    font-size: 0.9rem;
+    color: #4a5568;
+    margin: 0 0 8px;
+    line-height: 1.65;
+    text-shadow: none;
+}
+
+html.design-2026 .hero-unit p:last-child {
+    margin: 0;
+}
+
+html.design-2026 .hero-unit a {
+    color: #276749;
+    text-decoration: none;
+}
+
+html.design-2026 .hero-unit a:hover {
+    text-decoration: underline;
+}
+
+/* ---- Row overrides (kill Bootstrap negative margins) ---- */
+html.design-2026 .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* ---- Calculator card ---- */
+html.design-2026 .row > form {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 28px 28px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    display: -webkit-flex;
+    display: flex;
+    gap: 32px;
+    margin-bottom: 16px;
+    overflow: visible;
+}
+
+html.design-2026 .span7,
+html.design-2026 .span5 {
+    float: none !important;
+    margin-left: 0 !important;
+    width: auto !important;
+    -webkit-flex: 1;
+    flex: 1;
+    min-width: 0;
+}
+
+html.design-2026 .span7 {
+    -webkit-flex: 1.4;
+    flex: 1.4;
+}
+
+/* Column divider */
+html.design-2026 .span5 {
+    border-left: 1px solid #edf2f7;
+    padding-left: 32px;
+}
+
+/* ---- Fieldsets & legends ---- */
+html.design-2026 fieldset {
+    padding: 0;
+    border: none;
+    margin: 0;
+}
+
+html.design-2026 legend {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #a0aec0;
+    padding: 0;
+    margin: 0 0 16px;
+    border: none !important;
+    width: 100%;
+    line-height: 1;
+    display: block;
+}
+
+/* ---- Labels ---- */
+html.design-2026 label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #4a5568;
+    margin: 14px 0 4px;
+    line-height: 1.4;
+}
+
+html.design-2026 fieldset label:first-of-type {
+    margin-top: 0;
+}
+
+html.design-2026 label b {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* ---- Inputs ---- */
+html.design-2026 input[type="text"] {
+    width: 100% !important;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 9px 13px;
+    font-size: 0.9375rem;
+    font-family: inherit;
+    color: #2d3748;
+    background: #f7fafc;
+    border: 1.5px solid #cbd5e0 !important;
+    border-radius: 8px !important;
+    -webkit-border-radius: 8px !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    outline: none;
+    -webkit-transition: border-color .15s, box-shadow .15s, background .15s;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+    margin: 0;
+    line-height: 1.5;
+    display: block;
+}
+
+html.design-2026 input[type="text"]:focus {
+    background: #fff;
+    border-color: #38a169 !important;
+    -webkit-box-shadow: 0 0 0 3px rgba(56,161,105,.15) !important;
+    box-shadow: 0 0 0 3px rgba(56,161,105,.15) !important;
+    outline: none;
+}
+
+/* Highlight the computed outputs */
+html.design-2026 input#annualex,
+html.design-2026 input#annualinc,
+html.design-2026 input#dailyinc {
+    font-weight: 600;
+    background: #f0fff4;
+    border-color: #9ae6b4 !important;
+}
+
+html.design-2026 input#daysworked {
+    font-weight: 600;
+    background: #f0fff4;
+    border-color: #9ae6b4 !important;
+}
+
+/* ---- Description row ---- */
+html.design-2026 .row:last-child {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    display: block !important;
+    float: none !important;
+    overflow: hidden;
+}
+
+html.design-2026 .row:last-child p {
+    font-size: 0.85rem;
+    color: #718096;
+    line-height: 1.7;
+    margin: 0 0 10px;
+    float: none;
+}
+
+html.design-2026 .row:last-child p:last-child {
+    margin: 0;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 620px) {
+    html.design-2026 .row > form {
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    html.design-2026 .span5 {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid #edf2f7;
+        padding-top: 20px;
+    }
+
+    html.design-2026 .container {
+        padding: 24px 16px 48px;
+    }
+
+    html.design-2026 .navbar-inner {
+        padding: 0 16px;
+    }
+
+    html.design-2026 h1 {
+        font-size: 1.4rem;
+    }
+}
