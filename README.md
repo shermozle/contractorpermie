@@ -1,9 +1,9 @@
 contractorpermie
 ================
 
-Source for one page app contractorpermie.com
+Source for one page app contractorpermie.com.
 
-Requires [`s3cmd`](https://s3tools.org/s3cmd) and [`aws`](https://aws.amazon.com/cli/) CLI to sync to S3 and invalidate the Cloudfont cache
+Deployed via [Cloudflare Pages](https://pages.cloudflare.com/). Pushes to `master` deploy to production; pull requests and other branches get automatic preview URLs.
 
 Contributors:
 * [Simon Rumble](http://www.simonrumble.com/)
