@@ -125,17 +125,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			<div class="row">
 				<form>
 					<div class="span7">
-						<fieldset>
+						<fieldset id="main-fields">
 							<legend>Type in the number you have</legend>
+							<div id="premium-col-head" style="display:none">
+								<div class="premium-col-head-spacer"></div>
+								<div class="premium-col-head-label">With <span id="risk-pct-label">0%</span> risk premium</div>
+							</div>
 							<label><b>Standard annual salary</b></label>
-							<input type="text" placeholder="70000" id="annualex" rel="tooltip" title="What most people talk about as their annual salary, ex super and ex tax" />
+							<div class="input-with-premium">
+								<input type="text" placeholder="70000" id="annualex" rel="tooltip" title="What most people talk about as their annual salary, ex super and ex tax" />
+								<input type="text" id="annualex_premium" readonly class="premium-input" placeholder="—" title="Standard salary equivalent of the premium day rate" />
+							</div>
 							<label>"Package" annual salary</label>
-							<input type="text" placeholder="76650" id="annualinc" rel="tooltip" title="What the recruiter will quote you as 'package', inc super ex tax" />
+							<div class="input-with-premium">
+								<input type="text" placeholder="76650" id="annualinc" rel="tooltip" title="What the recruiter will quote you as 'package', inc super ex tax" />
+								<input type="text" id="annualinc_premium" readonly class="premium-input" placeholder="—" title="Package salary equivalent of the premium day rate" />
+							</div>
 							<label>Daily contract rate (inc superannuation, ex GST)</label>
-							<input type="text" placeholder="337.67" id="dailyinc" rel="toolip" title="Daily rate net of the standard days off in 'Assumptions'" />
-							<div id="daily-premium-row" style="display:none">
-								<label>Daily rate with <span id="risk-pct-label">0%</span> risk premium</label>
-								<input type="text" id="dailypremium" readonly placeholder="—" title="Day rate including the risk premium — what you should actually charge" />
+							<div class="input-with-premium">
+								<input type="text" placeholder="337.67" id="dailyinc" rel="toolip" title="Daily rate net of the standard days off in 'Assumptions'" />
+								<input type="text" id="dailypremium" readonly class="premium-input" placeholder="—" title="Day rate including the risk premium — what you should actually charge" />
 							</div>
 						</fieldset>
 					</div>
@@ -283,17 +292,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						this.value = format((this.value * 1).toFixed(0));
 					});
 				}
-				// Update premium day rate field (only when risk_premium gate is active)
+				// Update premium column (only when risk_premium gate is active)
 				if (window.__riskPremiumEnabled) {
 					var rawDaily = unformat($('#dailyinc').val());
 					var riskPct = parseFloat($('#riskpremium').val() || 0);
 					if (rawDaily > 0 && riskPct > 0) {
+						$('#annualex_premium').val(format((unformat($('#annualex').val()) * riskMultiplier).toFixed(0)));
+						$('#annualinc_premium').val(format((unformat($('#annualinc').val()) * riskMultiplier).toFixed(0)));
 						$('#dailypremium').val(format((rawDaily * riskMultiplier).toFixed(0)));
 						$('#risk-pct-label').text(riskPct + '%');
-						$('#daily-premium-row').show();
+						$('.premium-input').show();
+						$('.input-with-premium').addClass('showing-premium');
+						$('#premium-col-head').show();
 					} else {
-						$('#dailypremium').val('');
-						$('#daily-premium-row').hide();
+						$('#annualex_premium,#annualinc_premium,#dailypremium').val('');
+						$('.premium-input').hide();
+						$('.input-with-premium').removeClass('showing-premium');
+						$('#premium-col-head').hide();
 					}
 				}
 				savePrefs();
