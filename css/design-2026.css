@@ -218,6 +218,19 @@ html.design-2026 input#dailyinc {
     border-color: #9ae6b4 !important;
 }
 
+/* Premium day rate — stronger green, read-only output */
+html.design-2026 input#dailypremium {
+    font-weight: 700;
+    background: #c6f6d5;
+    border-color: #68d391 !important;
+    color: #276749;
+}
+
+html.design-2026 #risk-pct-label {
+    color: #38a169;
+    font-weight: 700;
+}
+
 
 
 /* ---- Description row ---- */

@@ -106,6 +106,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 							<input type="text" placeholder="76650" id="annualinc" rel="tooltip" title="What the recruiter will quote you as 'package', inc super ex tax" />
 							<label>Daily contract rate (inc superannuation, ex GST)</label>
 							<input type="text" placeholder="337.67" id="dailyinc" rel="toolip" title="Daily rate net of the standard days off in 'Assumptions'" />
+							<div id="daily-premium-row" style="display:none">
+								<label>Daily rate with <span id="risk-pct-label">0%</span> risk premium</label>
+								<input type="text" id="dailypremium" readonly placeholder="—" title="Day rate including the risk premium — what you should actually charge" />
+							</div>
 						</fieldset>
 					</div>
 					<div class="span5">
@@ -163,7 +167,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			}
 
 
-			$('input').change(function() {
+			var CP_PREF_KEYS = ['daysperweek', 'pubhols', 'annualleave', 'sickleave', 'superannuation', 'riskpremium'];
+
+		function savePrefs() {
+			CP_PREF_KEYS.forEach(function(k) {
+				var el = document.getElementById(k);
+				if (el) localStorage.setItem('cp.pref.' + k, el.value);
+			});
+		}
+
+		function loadPrefs() {
+			var restored = false;
+			CP_PREF_KEYS.forEach(function(k) {
+				var val = localStorage.getItem('cp.pref.' + k);
+				if (val !== null) {
+					var el = document.getElementById(k);
+					if (el) { el.value = val; restored = true; }
+				}
+			});
+			if (restored) {
+				$('#weekdays').val($('#daysperweek').val() * 52);
+				$('#daysworked').val(
+					parseInt($('#weekdays').val()) - parseInt($('#pubhols').val()) -
+					parseInt($('#annualleave').val()) - parseInt($('#sickleave').val())
+				);
+				var riskPct = parseFloat($('#riskpremium').val() || 0);
+				if (riskPct > 0) $('#riskpremium-display').text(riskPct + '%');
+			}
+		}
+
+		$('input').change(function() {
 				// Record the actually-entered field value before we format it down lower
 				fieldValue = this.value;
 
@@ -178,27 +211,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				switch(this.id) {
 					case 'annualex':
 						$('#annualinc').val($('#annualex').val() * superannuation);
-						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val() * riskMultiplier);
+						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val());
 						break;
 
 					case 'annualinc':
 						$('#annualex').val($('#annualinc').val() * (1 / superannuation));
-						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val() * riskMultiplier);
+						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val());
 						break;
 
 					case 'dailyinc':
-						$('#annualinc').val($('#dailyinc').val() / riskMultiplier * $('#daysworked').val());
+						$('#annualinc').val($('#dailyinc').val() * $('#daysworked').val());
 						$('#annualex').val($('#annualinc').val() * (1/superannuation));
 						break;
 
 					default:
 					if (this.id === 'riskpremium') {
-						// Premium changed: keep salary fixed, update day rate
+						// Premium changed: update display label; dailyinc stays unrisked,
+						// dailypremium is updated in the block below after formatting.
 						$('#riskpremium-display').text(this.value + '%');
-						if ($('#annualex').val() !== '') {
-							riskMultiplier = 1.0 + parseFloat(this.value) / 100;
-							$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val() * riskMultiplier);
-						}
 					} else {
 						// One of the other assumptions changed
 						$('#weekdays').val($('#daysperweek').val() * 52);
@@ -214,10 +244,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						$('#daysworked').val(
 							$('#weekdays').val() - $('#pubhols').val() - $('#annualleave').val() - $('#sickleave').val()
 						);
-						// If they've already done a calculation in the top bit, recalculate.
 						// Keep the day rate fixed; salary adjusts to match.
 						if ($('#annualex').val() !== '') {
-							$('#annualinc').val($('#dailyinc').val() / riskMultiplier * $('#daysworked').val());
+							$('#annualinc').val($('#dailyinc').val() * $('#daysworked').val());
 							$('#annualex').val($('#annualinc').val() * (1 / superannuation));
 						}
 					}
@@ -227,6 +256,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						this.value = format((this.value * 1).toFixed(0));
 					});
 				}
+				// Update premium day rate field (only when risk_premium gate is active)
+				if (window.__riskPremiumEnabled) {
+					var rawDaily = unformat($('#dailyinc').val());
+					var riskPct = parseFloat($('#riskpremium').val() || 0);
+					if (rawDaily > 0 && riskPct > 0) {
+						$('#dailypremium').val(format((rawDaily * riskMultiplier).toFixed(0)));
+						$('#risk-pct-label').text(riskPct + '%');
+						$('#daily-premium-row').show();
+					} else {
+						$('#dailypremium').val('');
+						$('#daily-premium-row').hide();
+					}
+				}
+				savePrefs();
 				dataLayer.push({
 					'event': 'change',
 					'fieldChanged': this.id,
@@ -268,6 +311,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				}
 
 			});
+		loadPrefs();
+
 		// Add the tooltips to the input fields
 		$('input').tooltip({'placement' : 'right'})
 
@@ -283,6 +328,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 					document.documentElement.classList.add('design-2026');
 				}
 				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
+					window.__riskPremiumEnabled = true;
 					var toggle = document.getElementById('settings-toggle');
 					var wrap = document.getElementById('settings-fieldset-wrap');
 					var riskSection = document.getElementById('risk-premium-section');
