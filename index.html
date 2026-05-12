@@ -59,14 +59,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		localStorage.setItem(STABLE_ID_KEY, stableID);
 	}
 
-	var statsigClient = new _s.StatsigClient('client-zO3RCgJ6Q5YKMdSWxzKk32e1BCGEUpEnUgqlSN5FUZ5', {
+	var statsigClient = new _s.StatsigClient('**************************************************', {
 		customIDs: { stableID: stableID }
 	});
-	_s.runStatsigSessionReplay(statsigClient);
-	_s.runStatsigAutoCapture(statsigClient);
 
 	// Safety valve: reveal page after 2s regardless, in case Statsig is slow or fails.
-	var revealPage = function() { document.documentElement.style.visibility = ''; };
+	var revealPage = function() {
+		document.documentElement.style.visibility = '';
+		// Start session replay and autocapture only after the page is visible —
+		// rrweb walks the DOM calling classList.add() and crashes if html is hidden.
+		_s.runStatsigSessionReplay(statsigClient);
+		_s.runStatsigAutoCapture(statsigClient);
+	};
 	var safetyTimer = setTimeout(revealPage, 2000);
 
 	window.statsigClient = statsigClient;
