@@ -42,6 +42,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <!-- Statsig SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@statsig/js-client@3/build/statsig-js-client+session-replay+web-analytics.min.js"></script>
+<script src="js/statsig-key.js"></script>
 <script>
 (function() {
 	var _s = window.Statsig;
@@ -59,7 +60,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		localStorage.setItem(STABLE_ID_KEY, stableID);
 	}
 
-	var statsigClient = new _s.StatsigClient(''client-zO3RCgJ6Q5YKMdSWxzKk32e1BCGEUpEnUgqlSN5FUZ', {
+	var statsigClient = new _s.StatsigClient( window.__STATSIG_KEY, {
 		customIDs: { stableID: stableID }
 	});
 
