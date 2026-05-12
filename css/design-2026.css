@@ -53,7 +53,7 @@ html.design-2026 .container {
 }
 
 html.design-2026 h1 {
-    font-size: 1.75rem;
+    font-size: 2.25rem;
     font-weight: 700;
     color: #1a202c;
     margin: 0 0 20px;
@@ -143,16 +143,19 @@ html.design-2026 fieldset {
 }
 
 html.design-2026 legend {
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #a0aec0;
+    letter-spacing: 0.08em;
+    color: #718096;
     padding: 0;
     margin: 0 0 16px;
     border: none !important;
+    border-bottom: none !important;
+    background: #fff;
+    text-shadow: none !important;
     width: 100%;
-    line-height: 1;
+    line-height: 1.4;
     display: block;
 }
 
@@ -215,11 +218,7 @@ html.design-2026 input#dailyinc {
     border-color: #9ae6b4 !important;
 }
 
-html.design-2026 input#daysworked {
-    font-weight: 600;
-    background: #f0fff4;
-    border-color: #9ae6b4 !important;
-}
+
 
 /* ---- Description row ---- */
 html.design-2026 .row:last-child {
