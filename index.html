@@ -7,6 +7,9 @@
 		<meta name="description" content="Calculator for Australians to compare contract rates with the equivalent permanent rates.">
 		<meta name="author" content="Simon Rumble">
 
+		<!-- Apply cached feature gate classes before CSS loads to prevent flicker -->
+		<script>if(localStorage.getItem('cp.gate.update_styles_2026')==='1'){document.documentElement.className+=' design-2026';}</script>
+
 		<!-- Le styles -->
 		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<style>
@@ -325,8 +328,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		// Apply new design and feature gates after Statsig initialises
 		if (window.__statsigReady) {
 			window.__statsigReady.then(function() {
-				if (window.statsigClient && window.statsigClient.checkGate('update_styles_2026')) {
-					document.documentElement.classList.add('design-2026');
+				if (window.statsigClient) {
+					var design = window.statsigClient.checkGate('update_styles_2026');
+					localStorage.setItem('cp.gate.update_styles_2026', design ? '1' : '0');
+					if (design) {
+						document.documentElement.classList.add('design-2026');
+					} else {
+						document.documentElement.classList.remove('design-2026');
+					}
 				}
 				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
 					window.__riskPremiumEnabled = true;
