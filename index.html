@@ -7,9 +7,10 @@
 		<meta name="description" content="Calculator for Australians to compare contract rates with the equivalent permanent rates.">
 		<meta name="author" content="Simon Rumble">
 
-		<!-- Hide page until feature gates are evaluated to prevent design flicker.
-		     A 2s safety timeout ensures the page is never left blank if Statsig fails. -->
-		<style>html{visibility:hidden}</style>
+		<!-- Cover the page until feature gates resolve to prevent design flicker.
+		     A white div rather than visibility:hidden keeps the DOM accessible to
+		     rrweb (session replay), which crashes when the root element is hidden. -->
+		<style>#gate-cover{position:fixed;inset:0;background:#fff;z-index:9999;pointer-events:none}</style>
 
 		<!-- Le styles -->
 		<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -64,22 +65,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		customIDs: { stableID: stableID }
 	});
 
-	// Safety valve: reveal page after 2s regardless, in case Statsig is slow or fails.
-	var revealPage = function() { document.documentElement.style.visibility = ''; };
+	// Session replay must be registered before initializeAsync to capture page load.
+	// Using a cover div (not visibility:hidden) keeps the DOM accessible to rrweb.
+	_s.runStatsigSessionReplay(statsigClient);
+	_s.runStatsigAutoCapture(statsigClient);
+
+	// Safety valve: remove cover after 2s regardless, in case Statsig is slow/fails.
+	var revealPage = function() {
+		var cover = document.getElementById('gate-cover');
+		if (cover) cover.parentNode.removeChild(cover);
+	};
 	var safetyTimer = setTimeout(revealPage, 2000);
 
 	window.statsigClient = statsigClient;
 
-	// initializeAsync fetches fresh values; reveal the page once gates are known.
+	// initializeAsync fetches fresh values; remove cover once gates are known.
 	window.__statsigReady = statsigClient.initializeAsync().then(function() {
 		clearTimeout(safetyTimer);
 		revealPage();
-		// Start replay/autocapture only after successful init and visible DOM —
-		// rrweb crashes if called on a failed/uninitialised client or hidden page.
-		_s.runStatsigSessionReplay(statsigClient);
-		_s.runStatsigAutoCapture(statsigClient);
 	}, function() {
-		// Init failed (bad key, network error) — reveal page but skip session replay.
 		clearTimeout(safetyTimer);
 		revealPage();
 	});
@@ -90,6 +94,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	</head>
 
 	<body>
+<div id="gate-cover"></div>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NKH9CR8"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
