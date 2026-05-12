@@ -7,8 +7,9 @@
 		<meta name="description" content="Calculator for Australians to compare contract rates with the equivalent permanent rates.">
 		<meta name="author" content="Simon Rumble">
 
-		<!-- Apply cached feature gate classes before CSS loads to prevent flicker -->
-		<script>if(localStorage.getItem('cp.gate.update_styles_2026')==='1'){document.documentElement.className+=' design-2026';}</script>
+		<!-- Hide page until feature gates are evaluated to prevent design flicker.
+		     A 2s safety timeout ensures the page is never left blank if Statsig fails. -->
+		<style>html{visibility:hidden}</style>
 
 		<!-- Le styles -->
 		<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -58,13 +59,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		localStorage.setItem(STABLE_ID_KEY, stableID);
 	}
 
-	var statsigClient = new _s.StatsigClient('client-zO3RCgJ6Q5YKMdSWxzKk32e1BCGEUpEnUgqlSN5FUZ5', {
+	var statsigClient = new _s.StatsigClient('**************************************************', {
 		customIDs: { stableID: stableID }
 	});
 	_s.runStatsigSessionReplay(statsigClient);
 	_s.runStatsigAutoCapture(statsigClient);
-	window.__statsigReady = statsigClient.initializeAsync();
+
+	// Safety valve: reveal page after 2s regardless, in case Statsig is slow or fails.
+	var revealPage = function() { document.documentElement.style.visibility = ''; };
+	var safetyTimer = setTimeout(revealPage, 2000);
+
+	// initializeSync reads Statsig's own localStorage cache — instant for return visitors.
+	statsigClient.initializeSync();
 	window.statsigClient = statsigClient;
+
+	// initializeAsync fetches fresh values and resolves the promise used below.
+	window.__statsigReady = statsigClient.initializeAsync().then(function() {
+		clearTimeout(safetyTimer);
+		revealPage();
+	});
 })();
 </script>
 <!-- End Statsig SDK -->
@@ -325,16 +338,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			$('#riskpremium-display').text(this.value + '%');
 		});
 
-		// Apply new design and feature gates after Statsig initialises
+		// Apply feature gates once Statsig has fetched fresh values.
 		if (window.__statsigReady) {
 			window.__statsigReady.then(function() {
 				if (window.statsigClient) {
-					var design = window.statsigClient.checkGate('update_styles_2026');
-					localStorage.setItem('cp.gate.update_styles_2026', design ? '1' : '0');
-					if (design) {
+					if (window.statsigClient.checkGate('update_styles_2026')) {
 						document.documentElement.classList.add('design-2026');
-					} else {
-						document.documentElement.classList.remove('design-2026');
 					}
 				}
 				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
