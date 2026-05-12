@@ -109,23 +109,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						</fieldset>
 					</div>
 					<div class="span5">
-						<fieldset>
-							<legend>Assumptions</legend>
-							<label>Days worked per week</label>
-							<input type="text" value="5" id="daysperweek" rel="tooltip" title="Change for part-timers">
-							<label>Weekdays in year</label>
-							<input type="text" value="261" id="weekdays" rel="tooltip" title="52 times days worked per week, so not 100% accurate">
-							<label>Public holidays</label>
-							<input type="text" value="9" id="pubhols" rel="tooltip" title="Based on NSW weekday public holidays for 2026">
-							<label>Annual leave</label>
-							<input type="text" value="20" id="annualleave" rel="tooltip" title="Four weeks' holidays if you work five days a week">
-							<label>Sick leave</label>
-							<input type="text" value="5" id="sickleave" rel="tooltip" title="Don't get sick more than a week">
-							<label>Super percentage</label>
-							<input type="text" value="12.0" id="superannuation">
-							<label><b>Net days worked</b></label>
-							<input type="text" value="227" id="daysworked">
-						</fieldset>
+						<button type="button" id="settings-toggle" class="btn settings-toggle" style="display:none" aria-expanded="false">Settings <span class="settings-chevron">&#9660;</span></button>
+						<div id="settings-fieldset-wrap">
+							<fieldset>
+								<legend>Assumptions</legend>
+								<div id="risk-premium-section" style="display:none">
+									<label>Risk premium: <strong id="riskpremium-display">0%</strong></label>
+									<input type="range" id="riskpremium" min="0" max="30" step="5" value="0" title="Extra % a contractor charges above the direct mathematical equivalent">
+									<div class="risk-premium-labels"><span>0%</span><span>15%</span><span>30%</span></div>
+									<p class="risk-premium-hint">The premium a contractor should charge above the direct equivalent, to compensate for no leave entitlements or job security.</p>
+								</div>
+								<label>Days worked per week</label>
+								<input type="text" value="5" id="daysperweek" rel="tooltip" title="Change for part-timers">
+								<label>Weekdays in year</label>
+								<input type="text" value="261" id="weekdays" rel="tooltip" title="52 times days worked per week, so not 100% accurate">
+								<label>Public holidays</label>
+								<input type="text" value="9" id="pubhols" rel="tooltip" title="Based on NSW weekday public holidays for 2026">
+								<label>Annual leave</label>
+								<input type="text" value="20" id="annualleave" rel="tooltip" title="Four weeks' holidays if you work five days a week">
+								<label>Sick leave</label>
+								<input type="text" value="5" id="sickleave" rel="tooltip" title="Don't get sick more than a week">
+								<label>Super percentage</label>
+								<input type="text" value="12.0" id="superannuation">
+								<label><b>Net days worked</b></label>
+								<input type="text" value="227" id="daysworked">
+							</fieldset>
+						</div>
 					</div>
 
 				</form>
@@ -158,7 +167,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				// Record the actually-entered field value before we format it down lower
 				fieldValue = this.value;
 
-				superannuation = 1.0 + $('#superannuation').val() / 100;
+				superannuation = 1.0 + parseFloat($('#superannuation').val()) / 100;
+				var riskMultiplier = 1.0 + parseFloat($('#riskpremium').val() || 0) / 100;
 
 				// Unformat before we do calculations
 				$('#annualex,#annualinc,#dailyinc').each(function() {
@@ -168,38 +178,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				switch(this.id) {
 					case 'annualex':
 						$('#annualinc').val($('#annualex').val() * superannuation);
-						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val());
+						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val() * riskMultiplier);
 						break;
 
 					case 'annualinc':
 						$('#annualex').val($('#annualinc').val() * (1 / superannuation));
-						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val());
+						$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val() * riskMultiplier);
 						break;
 
 					case 'dailyinc':
-						$('#annualinc').val($('#dailyinc').val() * $('#daysworked').val());
+						$('#annualinc').val($('#dailyinc').val() / riskMultiplier * $('#daysworked').val());
 						$('#annualex').val($('#annualinc').val() * (1/superannuation));
 						break;
 
 					default:
-					// One of the assumptions changed
-					$('#weekdays').val($('#daysperweek').val() * 52);
-
-					// Calculate annual leave pro rata from 20, but no more than 20
-					if ($('#daysperweek').val() > 5) {
-						alert("You're really gonna work more than 5 days every week? That sucks!");
-						$('#annualleave').val(20);
+					if (this.id === 'riskpremium') {
+						// Premium changed: keep salary fixed, update day rate
+						$('#riskpremium-display').text(this.value + '%');
+						if ($('#annualex').val() !== '') {
+							riskMultiplier = 1.0 + parseFloat(this.value) / 100;
+							$('#dailyinc').val($('#annualinc').val() / $('#daysworked').val() * riskMultiplier);
+						}
 					} else {
-						$('#annualleave').val(Math.round(($('#daysperweek').val()/5)*20));
-					}
+						// One of the other assumptions changed
+						$('#weekdays').val($('#daysperweek').val() * 52);
 
-					$('#daysworked').val(
-						$('#weekdays').val() - $('#pubhols').val() - $('#annualleave').val() - $('#sickleave').val()
-						// If they've already done a calculation in the top bit, recalculate
-					);
-					if ($('#annualex').val() !== '') {
-						$('#annualinc').val($('#dailyinc').val() * $('#daysworked').val());
-						$('#annualex').val($('#annualinc').val() * (1 / superannuation));
+						// Calculate annual leave pro rata from 20, but no more than 20
+						if ($('#daysperweek').val() > 5) {
+							alert("You're really gonna work more than 5 days every week? That sucks!");
+							$('#annualleave').val(20);
+						} else {
+							$('#annualleave').val(Math.round(($('#daysperweek').val()/5)*20));
+						}
+
+						$('#daysworked').val(
+							$('#weekdays').val() - $('#pubhols').val() - $('#annualleave').val() - $('#sickleave').val()
+						);
+						// If they've already done a calculation in the top bit, recalculate.
+						// Keep the day rate fixed; salary adjusts to match.
+						if ($('#annualex').val() !== '') {
+							$('#annualinc').val($('#dailyinc').val() / riskMultiplier * $('#daysworked').val());
+							$('#annualex').val($('#annualinc').val() * (1 / superannuation));
+						}
 					}
 				}
 				if ($('#annualex').val() !== '') {
@@ -223,7 +243,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 					'pubhols': ($('#pubhols').val() * 1),
 					'sickleave': ($('#sickleave').val() * 1),
 					'superannuation': ($('#superannuation').val() * 1),
-					'daysworked': ($('#daysworked').val() * 1)
+					'daysworked': ($('#daysworked').val() * 1),
+					'riskpremium': parseFloat($('#riskpremium').val() || 0)
 
 				})
 
@@ -241,7 +262,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						'pubhols': String($('#pubhols').val() * 1),
 						'sickleave': String($('#sickleave').val() * 1),
 						'superannuation': String($('#superannuation').val() * 1),
-						'daysworked': String($('#daysworked').val() * 1)
+						'daysworked': String($('#daysworked').val() * 1),
+						'riskpremium': String(parseFloat($('#riskpremium').val() || 0))
 					});
 				}
 
@@ -249,11 +271,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		// Add the tooltips to the input fields
 		$('input').tooltip({'placement' : 'right'})
 
-		// Apply new design when update_styles_2026 gate is on
+		// Live display update for risk premium slider (fires while dragging)
+		$('#riskpremium').on('input', function() {
+			$('#riskpremium-display').text(this.value + '%');
+		});
+
+		// Apply new design and feature gates after Statsig initialises
 		if (window.__statsigReady) {
 			window.__statsigReady.then(function() {
 				if (window.statsigClient && window.statsigClient.checkGate('update_styles_2026')) {
 					document.documentElement.classList.add('design-2026');
+				}
+				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
+					var toggle = document.getElementById('settings-toggle');
+					var wrap = document.getElementById('settings-fieldset-wrap');
+					var riskSection = document.getElementById('risk-premium-section');
+					toggle.style.display = 'block';
+					riskSection.style.display = 'block';
+					wrap.style.display = 'none';
+					toggle.addEventListener('click', function() {
+						var open = wrap.style.display !== 'none';
+						wrap.style.display = open ? 'none' : 'block';
+						this.setAttribute('aria-expanded', String(!open));
+						this.querySelector('.settings-chevron').textContent = open ? '\u25bc' : '\u25b2';
+					});
 				}
 			});
 		}
