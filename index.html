@@ -7,6 +7,11 @@
 		<meta name="description" content="Calculator for Australians to compare contract rates with the equivalent permanent rates.">
 		<meta name="author" content="Simon Rumble">
 
+		<!-- Cover the page until feature gates resolve to prevent design flicker.
+		     A white div rather than visibility:hidden keeps the DOM accessible to
+		     rrweb (session replay), which crashes when the root element is hidden. -->
+		<style>#gate-cover{position:fixed;inset:0;background:#fff;z-index:9999;pointer-events:none}</style>
+
 		<!-- Le styles -->
 		<link href="css/bootstrap.min.css" rel="stylesheet">
 		<style>
@@ -38,6 +43,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <!-- Statsig SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@statsig/js-client@3/build/statsig-js-client+session-replay+web-analytics.min.js"></script>
+<script src="js/statsig-key.js"></script>
 <script>
 (function() {
 	var _s = window.Statsig;
@@ -55,13 +61,32 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		localStorage.setItem(STABLE_ID_KEY, stableID);
 	}
 
-	var statsigClient = new _s.StatsigClient('client-zO3RCgJ6Q5YKMdSWxzKk32e1BCGEUpEnUgqlSN5FUZ5', {
+	var statsigClient = new _s.StatsigClient( window.__STATSIG_KEY, {
 		customIDs: { stableID: stableID }
 	});
+
+	// Session replay must be registered before initializeAsync to capture page load.
+	// Using a cover div (not visibility:hidden) keeps the DOM accessible to rrweb.
 	_s.runStatsigSessionReplay(statsigClient);
 	_s.runStatsigAutoCapture(statsigClient);
-	window.__statsigReady = statsigClient.initializeAsync();
+
+	// Safety valve: remove cover after 2s regardless, in case Statsig is slow/fails.
+	var revealPage = function() {
+		var cover = document.getElementById('gate-cover');
+		if (cover) cover.parentNode.removeChild(cover);
+	};
+	var safetyTimer = setTimeout(revealPage, 2000);
+
 	window.statsigClient = statsigClient;
+
+	// initializeAsync fetches fresh values; remove cover once gates are known.
+	window.__statsigReady = statsigClient.initializeAsync().then(function() {
+		clearTimeout(safetyTimer);
+		revealPage();
+	}, function() {
+		clearTimeout(safetyTimer);
+		revealPage();
+	});
 })();
 </script>
 <!-- End Statsig SDK -->
@@ -69,6 +94,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	</head>
 
 	<body>
+<div id="gate-cover"></div>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NKH9CR8"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -322,11 +348,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			$('#riskpremium-display').text(this.value + '%');
 		});
 
-		// Apply new design and feature gates after Statsig initialises
+		// Apply feature gates once Statsig has fetched fresh values.
 		if (window.__statsigReady) {
 			window.__statsigReady.then(function() {
-				if (window.statsigClient && window.statsigClient.checkGate('update_styles_2026')) {
-					document.documentElement.classList.add('design-2026');
+				if (window.statsigClient) {
+					if (window.statsigClient.checkGate('update_styles_2026')) {
+						document.documentElement.classList.add('design-2026');
+					}
 				}
 				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
 					window.__riskPremiumEnabled = true;
