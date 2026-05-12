@@ -69,12 +69,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	var revealPage = function() { document.documentElement.style.visibility = ''; };
 	var safetyTimer = setTimeout(revealPage, 2000);
 
-	// initializeSync reads Statsig's own localStorage cache — instant for return visitors.
-	statsigClient.initializeSync();
 	window.statsigClient = statsigClient;
 
-	// initializeAsync fetches fresh values and resolves the promise used below.
+	// initializeAsync fetches fresh values; reveal the page once gates are known.
 	window.__statsigReady = statsigClient.initializeAsync().then(function() {
+		clearTimeout(safetyTimer);
+		revealPage();
+	}, function() {
+		// Rejected (network error etc) — still reveal the page.
 		clearTimeout(safetyTimer);
 		revealPage();
 	});
