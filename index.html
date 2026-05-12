@@ -65,13 +65,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	});
 
 	// Safety valve: reveal page after 2s regardless, in case Statsig is slow or fails.
-	var revealPage = function() {
-		document.documentElement.style.visibility = '';
-		// Start session replay and autocapture only after the page is visible —
-		// rrweb walks the DOM calling classList.add() and crashes if html is hidden.
-		_s.runStatsigSessionReplay(statsigClient);
-		_s.runStatsigAutoCapture(statsigClient);
-	};
+	var revealPage = function() { document.documentElement.style.visibility = ''; };
 	var safetyTimer = setTimeout(revealPage, 2000);
 
 	window.statsigClient = statsigClient;
@@ -80,8 +74,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	window.__statsigReady = statsigClient.initializeAsync().then(function() {
 		clearTimeout(safetyTimer);
 		revealPage();
+		// Start replay/autocapture only after successful init and visible DOM —
+		// rrweb crashes if called on a failed/uninitialised client or hidden page.
+		_s.runStatsigSessionReplay(statsigClient);
+		_s.runStatsigAutoCapture(statsigClient);
 	}, function() {
-		// Rejected (network error etc) — still reveal the page.
+		// Init failed (bad key, network error) — reveal page but skip session replay.
 		clearTimeout(safetyTimer);
 		revealPage();
 	});
