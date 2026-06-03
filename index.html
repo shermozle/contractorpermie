@@ -4,13 +4,30 @@
 		<meta charset="utf-8">
 		<title>Contract or Permie?</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="color-scheme" content="light dark">
 		<meta name="description" content="Calculator for Australians to compare contract rates with the equivalent permanent rates.">
 		<meta name="author" content="Simon Rumble">
 
 		<!-- Cover the page until feature gates resolve to prevent design flicker.
 		     A white div rather than visibility:hidden keeps the DOM accessible to
 		     rrweb (session replay), which crashes when the root element is hidden. -->
-		<style>#gate-cover{position:fixed;inset:0;background:#fff;z-index:9999;pointer-events:none}</style>
+		<style>#gate-cover{position:fixed;inset:0;background:#fff;z-index:9999;pointer-events:none}html.dark-mode #gate-cover{background:#0f172a}</style>
+		<script>
+		(function() {
+			var storageKey = 'cp.pref.color_scheme';
+			var storedTheme = null;
+			try {
+				storedTheme = localStorage.getItem(storageKey);
+			} catch (e) {}
+
+			var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+			var theme = storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : (prefersDark ? 'dark' : 'light');
+
+			document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+			document.documentElement.setAttribute('data-color-scheme', theme);
+			window.__CP_THEME_KEY = storageKey;
+		})();
+		</script>
 
 		<!-- Le styles -->
 		<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -107,6 +124,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</a>
+					<button type="button" id="theme-toggle" class="btn theme-toggle pull-right" aria-label="Switch to dark mode" aria-pressed="false">
+						<span class="theme-toggle-icon" aria-hidden="true"></span>
+						<span id="theme-toggle-label">Dark mode</span>
+					</button>
 					<a class="brand" href="#">Contract or Permie?</a>
 				</div>
 			</div>
@@ -232,6 +253,68 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			}
 		}
 
+		function getStoredTheme() {
+			try {
+				var storedTheme = localStorage.getItem(window.__CP_THEME_KEY || 'cp.pref.color_scheme');
+				return storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : null;
+			} catch (e) {
+				return null;
+			}
+		}
+
+		function setStoredTheme(theme) {
+			try {
+				localStorage.setItem(window.__CP_THEME_KEY || 'cp.pref.color_scheme', theme);
+			} catch (e) {}
+		}
+
+		function getSystemTheme() {
+			return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		}
+
+		function applyTheme(theme) {
+			var isDark = theme === 'dark';
+			var toggle = document.getElementById('theme-toggle');
+			var label = document.getElementById('theme-toggle-label');
+
+			document.documentElement.classList.toggle('dark-mode', isDark);
+			document.documentElement.setAttribute('data-color-scheme', theme);
+
+			if (toggle) {
+				toggle.setAttribute('aria-pressed', String(isDark));
+				toggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+			}
+			if (label) {
+				label.textContent = isDark ? 'Light mode' : 'Dark mode';
+			}
+		}
+
+		function initThemeToggle() {
+			var toggle = document.getElementById('theme-toggle');
+			if (!toggle) return;
+
+			applyTheme(getStoredTheme() || getSystemTheme());
+			toggle.addEventListener('click', function() {
+				var nextTheme = document.documentElement.classList.contains('dark-mode') ? 'light' : 'dark';
+				setStoredTheme(nextTheme);
+				applyTheme(nextTheme);
+			});
+
+			if (window.matchMedia) {
+				var themeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+				var syncSystemTheme = function(event) {
+					if (getStoredTheme() === null) {
+						applyTheme(event.matches ? 'dark' : 'light');
+					}
+				};
+				if (themeQuery.addEventListener) {
+					themeQuery.addEventListener('change', syncSystemTheme);
+				} else if (themeQuery.addListener) {
+					themeQuery.addListener(syncSystemTheme);
+				}
+			}
+		}
+
 		$('input').change(function() {
 				// Record the actually-entered field value before we format it down lower
 				fieldValue = this.value;
@@ -354,6 +437,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 			});
 		loadPrefs();
+		initThemeToggle();
 
 		// Add the tooltips to the input fields
 		$('input').tooltip({'placement' : 'right'})
