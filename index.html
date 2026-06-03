@@ -15,17 +15,28 @@
 		<script>
 		(function() {
 			var storageKey = 'cp.pref.color_scheme';
-			var storedTheme = null;
-			try {
-				storedTheme = localStorage.getItem(storageKey);
-			} catch (e) {}
 
-			var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-			var theme = storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : (prefersDark ? 'dark' : 'light');
+			function getStoredTheme() {
+				try {
+					var storedTheme = localStorage.getItem(storageKey);
+					return storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : null;
+				} catch (e) {
+					return null;
+				}
+			}
 
-			document.documentElement.classList.toggle('dark-mode', theme === 'dark');
-			document.documentElement.setAttribute('data-color-scheme', theme);
+			function getSystemTheme() {
+				return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			}
+
 			window.__CP_THEME_KEY = storageKey;
+			window.__CP_RESOLVE_THEME = function() {
+				return getStoredTheme() || getSystemTheme();
+			};
+			window.__CP_APPLY_THEME_CLASS = function(theme) {
+				document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+				document.documentElement.setAttribute('data-color-scheme', theme);
+			};
 		})();
 		</script>
 
@@ -99,6 +110,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	// initializeAsync fetches fresh values; remove cover once gates are known.
 	window.__statsigReady = statsigClient.initializeAsync().then(function() {
 		clearTimeout(safetyTimer);
+		if (statsigClient.checkGate('dark_mode') && window.__CP_APPLY_THEME_CLASS && window.__CP_RESOLVE_THEME) {
+			window.__darkModeEnabled = true;
+			window.__CP_APPLY_THEME_CLASS(window.__CP_RESOLVE_THEME());
+		}
 		revealPage();
 	}, function() {
 		clearTimeout(safetyTimer);
@@ -124,7 +139,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</a>
-					<button type="button" id="theme-toggle" class="btn theme-toggle pull-right" aria-label="Switch to dark mode" aria-pressed="false">
+					<button type="button" id="theme-toggle" class="btn theme-toggle pull-right" style="display:none" aria-label="Switch to dark mode" aria-pressed="false">
 						<span class="theme-toggle-icon" aria-hidden="true"></span>
 						<span id="theme-toggle-label">Dark mode</span>
 					</button>
@@ -277,8 +292,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			var toggle = document.getElementById('theme-toggle');
 			var label = document.getElementById('theme-toggle-label');
 
-			document.documentElement.classList.toggle('dark-mode', isDark);
-			document.documentElement.setAttribute('data-color-scheme', theme);
+			if (window.__CP_APPLY_THEME_CLASS) {
+				window.__CP_APPLY_THEME_CLASS(theme);
+			}
 
 			if (toggle) {
 				toggle.setAttribute('aria-pressed', String(isDark));
@@ -291,8 +307,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 		function initThemeToggle() {
 			var toggle = document.getElementById('theme-toggle');
-			if (!toggle) return;
+			if (!toggle || toggle.getAttribute('data-theme-toggle-ready') === 'true') return;
 
+			toggle.style.display = 'inline-block';
+			toggle.setAttribute('data-theme-toggle-ready', 'true');
 			applyTheme(getStoredTheme() || getSystemTheme());
 			toggle.addEventListener('click', function() {
 				var nextTheme = document.documentElement.classList.contains('dark-mode') ? 'light' : 'dark';
@@ -437,7 +455,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 			});
 		loadPrefs();
-		initThemeToggle();
 
 		// Add the tooltips to the input fields
 		$('input').tooltip({'placement' : 'right'})
@@ -454,6 +471,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 					if (window.statsigClient.checkGate('update_styles_2026')) {
 						document.documentElement.classList.add('design-2026');
 					}
+				}
+				if (window.statsigClient && window.statsigClient.checkGate('dark_mode')) {
+					window.__darkModeEnabled = true;
+					initThemeToggle();
 				}
 				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
 					window.__riskPremiumEnabled = true;
