@@ -412,3 +412,239 @@ html.design-2026 .risk-premium-hint {
         font-size: 1rem;
     }
 }
+
+/* ---- Theme toggle ---- */
+.theme-toggle {
+    float: right;
+    margin: 8px 0 0 12px;
+    font-weight: 600;
+}
+
+.theme-toggle .theme-toggle-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: #1a202c;
+    box-shadow: inset -4px -3px 0 #fff;
+    vertical-align: -2px;
+}
+
+html.dark-mode .theme-toggle .theme-toggle-icon {
+    background: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, .22);
+}
+
+html.design-2026 .theme-toggle {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,255,255,.22) !important;
+    background: rgba(255,255,255,.08);
+    background-image: none !important;
+    color: #fff;
+    text-shadow: none;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+html.design-2026 .theme-toggle:hover,
+html.design-2026 .theme-toggle:focus {
+    background: rgba(255,255,255,.16);
+    color: #fff;
+}
+
+/* ---- Dark mode: legacy Bootstrap layout ---- */
+html.dark-mode body {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+html.dark-mode a {
+    color: #93c5fd;
+}
+
+html.dark-mode .navbar-inverse .navbar-inner {
+    background: #020617 !important;
+    background-image: none !important;
+    border-color: #1e293b !important;
+}
+
+html.dark-mode .navbar .brand {
+    color: #f8fafc !important;
+    text-shadow: none !important;
+}
+
+html.dark-mode .hero-unit,
+html.dark-mode .modal-content,
+html.dark-mode .modal-body,
+html.dark-mode .modal-header,
+html.dark-mode .modal-footer {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+html.dark-mode .hero-unit p,
+html.dark-mode .row p,
+html.dark-mode label {
+    color: #cbd5e1;
+}
+
+html.dark-mode legend {
+    color: #f8fafc;
+    border-bottom-color: #334155;
+}
+
+html.dark-mode input[type="text"],
+html.dark-mode input[type="email"],
+html.dark-mode input[type="range"] {
+    background: #111827;
+    color: #f8fafc;
+    border-color: #475569;
+}
+
+html.dark-mode input::-webkit-input-placeholder {
+    color: #94a3b8;
+}
+
+html.dark-mode input::-moz-placeholder {
+    color: #94a3b8;
+}
+
+html.dark-mode input:-ms-input-placeholder {
+    color: #94a3b8;
+}
+
+html.dark-mode .theme-toggle {
+    background: #1e293b;
+    background-image: none;
+    border-color: #475569;
+    color: #f8fafc;
+    text-shadow: none;
+}
+
+html.dark-mode .theme-toggle:hover,
+html.dark-mode .theme-toggle:focus {
+    background: #334155;
+    color: #fff;
+}
+
+/* ---- Dark mode: Design 2026 layout ---- */
+html.design-2026.dark-mode body {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+html.design-2026.dark-mode .navbar-inner {
+    background: #020617 !important;
+}
+
+html.design-2026.dark-mode .site-name {
+    color: #f8fafc;
+}
+
+html.design-2026.dark-mode h1,
+html.design-2026.dark-mode .hero-unit p,
+html.design-2026.dark-mode .row:last-child p,
+html.design-2026.dark-mode label {
+    color: #cbd5e1;
+}
+
+html.design-2026.dark-mode .hero-unit,
+html.design-2026.dark-mode .row > form,
+html.design-2026.dark-mode .row:last-child {
+    background: #111827;
+    border-color: #334155;
+    box-shadow: 0 1px 3px rgba(0,0,0,.35);
+}
+
+html.design-2026.dark-mode .span5 {
+    border-left-color: #334155;
+}
+
+html.design-2026.dark-mode legend {
+    background: #111827;
+    color: #94a3b8;
+}
+
+html.design-2026.dark-mode label b,
+html.design-2026.dark-mode #risk-premium-section label {
+    color: #f8fafc;
+}
+
+html.design-2026.dark-mode input[type="text"] {
+    background: #0f172a;
+    border-color: #475569 !important;
+    color: #f8fafc;
+}
+
+html.design-2026.dark-mode input[type="text"]:focus {
+    background: #020617;
+    border-color: #34d399 !important;
+    -webkit-box-shadow: 0 0 0 3px rgba(52,211,153,.16) !important;
+    box-shadow: 0 0 0 3px rgba(52,211,153,.16) !important;
+}
+
+html.design-2026.dark-mode input#annualex,
+html.design-2026.dark-mode input#annualinc,
+html.design-2026.dark-mode input#dailyinc {
+    background: #052e2b;
+    border-color: #047857 !important;
+}
+
+html.design-2026.dark-mode input.premium-input {
+    background: #064e3b;
+    border-color: #10b981 !important;
+    color: #bbf7d0;
+}
+
+html.design-2026.dark-mode .premium-col-head-label,
+html.design-2026.dark-mode #risk-pct-label,
+html.design-2026.dark-mode #riskpremium-display,
+html.design-2026.dark-mode .hero-unit a {
+    color: #6ee7b7;
+}
+
+html.design-2026.dark-mode .settings-toggle {
+    background: #0f172a;
+    border-color: #475569 !important;
+    color: #cbd5e1;
+}
+
+html.design-2026.dark-mode .settings-toggle:hover {
+    background: #052e2b;
+    border-color: #34d399 !important;
+    color: #bbf7d0;
+}
+
+html.design-2026.dark-mode .settings-chevron,
+html.design-2026.dark-mode .risk-premium-labels {
+    color: #94a3b8;
+}
+
+html.design-2026.dark-mode #risk-premium-section {
+    border-bottom-color: #334155;
+}
+
+html.design-2026.dark-mode .risk-premium-hint {
+    color: #94a3b8;
+}
+
+html.design-2026.dark-mode .theme-toggle {
+    background: rgba(148,163,184,.12);
+    border-color: rgba(226,232,240,.2) !important;
+    color: #f8fafc;
+}
+
+html.design-2026.dark-mode .theme-toggle:hover,
+html.design-2026.dark-mode .theme-toggle:focus {
+    background: rgba(148,163,184,.2);
+}
+
+@media (max-width: 620px) {
+    html.design-2026.dark-mode .span5 {
+        border-left: none;
+        border-top-color: #334155;
+    }
+}

@@ -4,13 +4,41 @@
 		<meta charset="utf-8">
 		<title>Contract or Permie?</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="color-scheme" content="light dark">
 		<meta name="description" content="Calculator for Australians to compare contract rates with the equivalent permanent rates.">
 		<meta name="author" content="Simon Rumble">
 
 		<!-- Cover the page until feature gates resolve to prevent design flicker.
 		     A white div rather than visibility:hidden keeps the DOM accessible to
 		     rrweb (session replay), which crashes when the root element is hidden. -->
-		<style>#gate-cover{position:fixed;inset:0;background:#fff;z-index:9999;pointer-events:none}</style>
+		<style>#gate-cover{position:fixed;inset:0;background:#fff;z-index:9999;pointer-events:none}html.dark-mode #gate-cover{background:#0f172a}</style>
+		<script>
+		(function() {
+			var storageKey = 'cp.pref.color_scheme';
+
+			function getStoredTheme() {
+				try {
+					var storedTheme = localStorage.getItem(storageKey);
+					return storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : null;
+				} catch (e) {
+					return null;
+				}
+			}
+
+			function getSystemTheme() {
+				return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			}
+
+			window.__CP_THEME_KEY = storageKey;
+			window.__CP_RESOLVE_THEME = function() {
+				return getStoredTheme() || getSystemTheme();
+			};
+			window.__CP_APPLY_THEME_CLASS = function(theme) {
+				document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+				document.documentElement.setAttribute('data-color-scheme', theme);
+			};
+		})();
+		</script>
 
 		<!-- Le styles -->
 		<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -82,6 +110,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	// initializeAsync fetches fresh values; remove cover once gates are known.
 	window.__statsigReady = statsigClient.initializeAsync().then(function() {
 		clearTimeout(safetyTimer);
+		if (statsigClient.checkGate('dark_mode') && window.__CP_APPLY_THEME_CLASS && window.__CP_RESOLVE_THEME) {
+			window.__darkModeEnabled = true;
+			window.__CP_APPLY_THEME_CLASS(window.__CP_RESOLVE_THEME());
+		}
 		revealPage();
 	}, function() {
 		clearTimeout(safetyTimer);
@@ -107,6 +139,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</a>
+					<button type="button" id="theme-toggle" class="btn theme-toggle pull-right" style="display:none" aria-label="Switch to dark mode" aria-pressed="false">
+						<span class="theme-toggle-icon" aria-hidden="true"></span>
+						<span id="theme-toggle-label">Dark mode</span>
+					</button>
 					<a class="brand" href="#">Contract or Permie?</a>
 				</div>
 			</div>
@@ -229,6 +265,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				);
 				var riskPct = parseFloat($('#riskpremium').val() || 0);
 				if (riskPct > 0) $('#riskpremium-display').text(riskPct + '%');
+			}
+		}
+
+		function getStoredTheme() {
+			try {
+				var storedTheme = localStorage.getItem(window.__CP_THEME_KEY || 'cp.pref.color_scheme');
+				return storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : null;
+			} catch (e) {
+				return null;
+			}
+		}
+
+		function setStoredTheme(theme) {
+			try {
+				localStorage.setItem(window.__CP_THEME_KEY || 'cp.pref.color_scheme', theme);
+			} catch (e) {}
+		}
+
+		function getSystemTheme() {
+			return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		}
+
+		function applyTheme(theme) {
+			var isDark = theme === 'dark';
+			var toggle = document.getElementById('theme-toggle');
+			var label = document.getElementById('theme-toggle-label');
+
+			if (window.__CP_APPLY_THEME_CLASS) {
+				window.__CP_APPLY_THEME_CLASS(theme);
+			}
+
+			if (toggle) {
+				toggle.setAttribute('aria-pressed', String(isDark));
+				toggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+			}
+			if (label) {
+				label.textContent = isDark ? 'Light mode' : 'Dark mode';
+			}
+		}
+
+		function initThemeToggle() {
+			var toggle = document.getElementById('theme-toggle');
+			if (!toggle || toggle.getAttribute('data-theme-toggle-ready') === 'true') return;
+
+			toggle.style.display = 'inline-block';
+			toggle.setAttribute('data-theme-toggle-ready', 'true');
+			applyTheme(getStoredTheme() || getSystemTheme());
+			toggle.addEventListener('click', function() {
+				var nextTheme = document.documentElement.classList.contains('dark-mode') ? 'light' : 'dark';
+				setStoredTheme(nextTheme);
+				applyTheme(nextTheme);
+			});
+
+			if (window.matchMedia) {
+				var themeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+				var syncSystemTheme = function(event) {
+					if (getStoredTheme() === null) {
+						applyTheme(event.matches ? 'dark' : 'light');
+					}
+				};
+				if (themeQuery.addEventListener) {
+					themeQuery.addEventListener('change', syncSystemTheme);
+				} else if (themeQuery.addListener) {
+					themeQuery.addListener(syncSystemTheme);
+				}
 			}
 		}
 
@@ -370,6 +471,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 					if (window.statsigClient.checkGate('update_styles_2026')) {
 						document.documentElement.classList.add('design-2026');
 					}
+				}
+				if (window.statsigClient && window.statsigClient.checkGate('dark_mode')) {
+					window.__darkModeEnabled = true;
+					initThemeToggle();
 				}
 				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
 					window.__riskPremiumEnabled = true;
