@@ -46,6 +46,9 @@
 			body {
 				padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
 			}
+			.tooltip-inner {
+				max-width: min(200px, calc(100vw - 24px));
+			}
 		</style>
 		<link href="css/bootstrap-responsive.css" rel="stylesheet">
 		<link href="css/design-2026.css" rel="stylesheet">
@@ -227,6 +230,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script src="js/bootstrap.js"></script>
+		<script src="js/tooltip-viewport.js"></script>
 		<script type="text/javascript">
 			function format(input) {
 				return new Intl.NumberFormat('en-AU', {style: 'currency', currency: 'AUD', maximumSignificantDigits: 3}).format(input); 
@@ -454,8 +458,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			});
 		loadPrefs();
 
-		// Add the tooltips to the input fields
-		$('input').tooltip({'placement' : 'right'})
+		// Add the tooltips to the input fields (viewport-aware on narrow screens)
+		initViewportTooltips('input');
 
 		// Live display update for risk premium slider (fires while dragging)
 		$('#riskpremium').on('input', function() {

@@ -153,6 +153,7 @@
 		<!-- Placed at the end of the document so the pages load faster -->
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script src="js/bootstrap.js"></script>
+		<script src="js/tooltip-viewport.js"></script>
 		<script type="text/javascript">
 			$('input').change(function() {
 				$('#listsubscribe').fadeIn()
@@ -190,8 +191,8 @@
 				}
 
 			});
-		// Add the tooltips to the input fields
-		$('input').tooltip({'placement' : 'right'})
+		// Add the tooltips to the input fields (viewport-aware on narrow screens)
+		initViewportTooltips('input');
 		</script>
 
 	</body>
