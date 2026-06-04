@@ -110,16 +110,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 	window.statsigClient = statsigClient;
 
-	// initializeAsync fetches fresh values; remove cover once gates are known.
-	window.__statsigReady = statsigClient.initializeAsync().then(function() {
-		clearTimeout(safetyTimer);
-		if (statsigClient.checkGate('dark_mode') && window.__CP_APPLY_THEME_CLASS && window.__CP_RESOLVE_THEME) {
+	// Evaluate each gate once after initializeAsync (network values), then reveal.
+	function applyStatsigGates() {
+		var gates = {
+			update_styles_2026: statsigClient.checkGate('update_styles_2026'),
+			dark_mode: statsigClient.checkGate('dark_mode'),
+			risk_premium: statsigClient.checkGate('risk_premium')
+		};
+		window.__CP_GATES = gates;
+
+		if (gates.update_styles_2026) {
+			document.documentElement.classList.add('design-2026');
+		}
+		if (gates.dark_mode && window.__CP_APPLY_THEME_CLASS && window.__CP_RESOLVE_THEME) {
 			window.__darkModeEnabled = true;
 			window.__CP_APPLY_THEME_CLASS(window.__CP_RESOLVE_THEME());
 		}
+		if (typeof window.__CP_APPLY_DOM_GATES === 'function') {
+			window.__CP_APPLY_DOM_GATES();
+		}
+	}
+
+	window.__statsigReady = statsigClient.initializeAsync().then(function() {
+		clearTimeout(safetyTimer);
+		applyStatsigGates();
 		revealPage();
 	}, function() {
 		clearTimeout(safetyTimer);
+		window.__CP_GATES = {};
 		revealPage();
 	});
 })();
@@ -466,34 +484,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			$('#riskpremium-display').text(this.value + '%');
 		});
 
-		// Apply feature gates once Statsig has fetched fresh values.
-		if (window.__statsigReady) {
-			window.__statsigReady.then(function() {
-				if (window.statsigClient) {
-					if (window.statsigClient.checkGate('update_styles_2026')) {
-						document.documentElement.classList.add('design-2026');
-					}
-				}
-				if (window.statsigClient && window.statsigClient.checkGate('dark_mode')) {
-					window.__darkModeEnabled = true;
-					initThemeToggle();
-				}
-				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
-					window.__riskPremiumEnabled = true;
-					var toggle = document.getElementById('settings-toggle');
-					var wrap = document.getElementById('settings-fieldset-wrap');
-					var riskSection = document.getElementById('risk-premium-section');
-					toggle.style.display = 'block';
-					riskSection.style.display = 'block';
-					wrap.style.display = 'none';
-					toggle.addEventListener('click', function() {
-						var open = wrap.style.display !== 'none';
-						wrap.style.display = open ? 'none' : 'block';
-						this.setAttribute('aria-expanded', String(!open));
-						this.querySelector('.settings-chevron').textContent = open ? '\u25bc' : '\u25b2';
-					});
-				}
-			});
+		// DOM updates for gates (evaluated once in head after initializeAsync).
+		window.__CP_APPLY_DOM_GATES = function() {
+			var gates = window.__CP_GATES;
+			if (!gates) return;
+
+			if (gates.dark_mode) {
+				initThemeToggle();
+			}
+			if (gates.risk_premium) {
+				window.__riskPremiumEnabled = true;
+				var toggle = document.getElementById('settings-toggle');
+				var wrap = document.getElementById('settings-fieldset-wrap');
+				var riskSection = document.getElementById('risk-premium-section');
+				toggle.style.display = 'block';
+				riskSection.style.display = 'block';
+				wrap.style.display = 'none';
+				toggle.addEventListener('click', function() {
+					var open = wrap.style.display !== 'none';
+					wrap.style.display = open ? 'none' : 'block';
+					this.setAttribute('aria-expanded', String(!open));
+					this.querySelector('.settings-chevron').textContent = open ? '\u25bc' : '\u25b2';
+				});
+			}
+		};
+
+		if (window.__CP_GATES) {
+			window.__CP_APPLY_DOM_GATES();
+		} else if (window.__statsigReady) {
+			window.__statsigReady.then(window.__CP_APPLY_DOM_GATES);
 		}
 		</script>
 	</body>
