@@ -140,6 +140,10 @@ html.design-2026 .span7 {
     flex: 1.4;
 }
 
+html.design-2026 #main-fields {
+    min-width: 0;
+}
+
 /* Column divider */
 html.design-2026 .span5 {
     border-left: 1px solid #edf2f7;
@@ -240,39 +244,47 @@ html.design-2026 input.premium-input {
 
 /* Side-by-side layout when premium column is visible */
 html.design-2026 .input-with-premium.showing-premium {
-    display: -webkit-flex;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 12px;
+    min-width: 0;
 }
 
 html.design-2026 .input-with-premium.showing-premium input {
-    -webkit-flex: 1;
-    flex: 1;
-    width: auto !important;
+    width: 100% !important;
+    min-width: 0;
+}
+
+html.design-2026 .input-with-premium.showing-premium .premium-input {
+    display: block;
 }
 
 /* Column heading */
 html.design-2026 #premium-col-head {
-    display: -webkit-flex;
-    display: flex;
+    display: none;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 12px;
     margin-bottom: 6px;
+    min-width: 0;
+}
+
+html.design-2026 #premium-col-head.is-visible {
+    display: grid;
 }
 
 html.design-2026 .premium-col-head-spacer {
-    -webkit-flex: 1;
-    flex: 1;
+    min-width: 0;
 }
 
 html.design-2026 .premium-col-head-label {
-    -webkit-flex: 1;
-    flex: 1;
+    min-width: 0;
     font-size: 0.6875rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #276749;
     text-align: center;
+    line-height: 1.35;
 }
 
 html.design-2026 #risk-pct-label {
@@ -387,6 +399,7 @@ html.design-2026 .risk-premium-hint {
         flex-direction: column;
         gap: 20px;
         padding: 20px;
+        overflow: hidden;
     }
 
     html.design-2026 .span5 {
@@ -410,6 +423,23 @@ html.design-2026 .risk-premium-hint {
 
     html.design-2026 h1 {
         font-size: 1rem;
+    }
+
+    /* Keep dual salary columns inside the card on narrow viewports */
+    html.design-2026 .input-with-premium.showing-premium,
+    html.design-2026 #premium-col-head.is-visible {
+        gap: 8px;
+    }
+
+    html.design-2026 .input-with-premium.showing-premium input {
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: 0.8125rem;
+    }
+
+    html.design-2026 .premium-col-head-label {
+        font-size: 0.625rem;
+        letter-spacing: 0.04em;
     }
 }
 
