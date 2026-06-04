@@ -37,6 +37,13 @@
 				document.documentElement.classList.toggle('dark-mode', theme === 'dark');
 				document.documentElement.setAttribute('data-color-scheme', theme);
 			};
+
+			// Apply last-known design gate immediately so returning users don't flash legacy UI.
+			try {
+				if (sessionStorage.getItem('cp.gate.update_styles_2026') === '1') {
+					document.documentElement.classList.add('design-2026');
+				}
+			} catch (e) {}
 		})();
 		</script>
 
@@ -72,16 +79,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-NKH9CR8');</script>
 <!-- End Google Tag Manager -->
-<!-- Statsig SDK -->
+<!-- Statsig SDK (init runs after #gate-cover in body) -->
 <script src="https://cdn.jsdelivr.net/npm/@statsig/js-client@3/build/statsig-js-client+session-replay+web-analytics.min.js"></script>
 <script src="js/statsig-key.js"></script>
+<!-- End Statsig SDK -->
+		<meta name="google-site-verification" content="FPm2dPKx77pTd0CoT1IxY19bd3XXZ3zbRDXRTtGvr5k" />
+	</head>
+
+	<body>
+<div id="gate-cover"></div>
 <script>
 (function() {
 	var _s = window.Statsig;
+	var DESIGN_GATE_CACHE = 'cp.gate.update_styles_2026';
 
-	// Generate a persistent stable ID so Statsig gates can target anonymous users.
-	// The SDK records a session ID internally but doesn't expose it in customIDs
-	// for gate evaluation unless we pass it explicitly.
 	var STABLE_ID_KEY = 'cp.stable_id';
 	var stableID = localStorage.getItem(STABLE_ID_KEY);
 	if (!stableID) {
@@ -92,44 +103,80 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		localStorage.setItem(STABLE_ID_KEY, stableID);
 	}
 
-	var statsigClient = new _s.StatsigClient( window.__STATSIG_KEY, {
+	var statsigClient = new _s.StatsigClient(window.__STATSIG_KEY, {
 		customIDs: { stableID: stableID }
 	});
 
-	// Session replay must be registered before initializeAsync to capture page load.
-	// Using a cover div (not visibility:hidden) keeps the DOM accessible to rrweb.
 	_s.runStatsigSessionReplay(statsigClient);
 	_s.runStatsigAutoCapture(statsigClient);
-
-	// Safety valve: remove cover after 2s regardless, in case Statsig is slow/fails.
-	var revealPage = function() {
-		var cover = document.getElementById('gate-cover');
-		if (cover) cover.parentNode.removeChild(cover);
-	};
-	var safetyTimer = setTimeout(revealPage, 2000);
-
 	window.statsigClient = statsigClient;
 
-	// initializeAsync fetches fresh values; remove cover once gates are known.
-	window.__statsigReady = statsigClient.initializeAsync().then(function() {
-		clearTimeout(safetyTimer);
-		if (statsigClient.checkGate('dark_mode') && window.__CP_APPLY_THEME_CLASS && window.__CP_RESOLVE_THEME) {
+	var pageRevealed = false;
+
+	function revealPage() {
+		var cover = document.getElementById('gate-cover');
+		if (cover) cover.parentNode.removeChild(cover);
+		pageRevealed = true;
+	}
+
+	function applyStatsigGates() {
+		var gates = {
+			update_styles_2026: statsigClient.checkGate('update_styles_2026'),
+			dark_mode: statsigClient.checkGate('dark_mode'),
+			risk_premium: statsigClient.checkGate('risk_premium')
+		};
+		window.__CP_GATES = gates;
+
+		if (gates.update_styles_2026) {
+			document.documentElement.classList.add('design-2026');
+		} else {
+			document.documentElement.classList.remove('design-2026');
+		}
+		try {
+			sessionStorage.setItem(DESIGN_GATE_CACHE, gates.update_styles_2026 ? '1' : '0');
+		} catch (e) {}
+
+		if (gates.dark_mode && window.__CP_APPLY_THEME_CLASS && window.__CP_RESOLVE_THEME) {
 			window.__darkModeEnabled = true;
 			window.__CP_APPLY_THEME_CLASS(window.__CP_RESOLVE_THEME());
 		}
+		if (typeof window.__CP_APPLY_DOM_GATES === 'function') {
+			window.__CP_APPLY_DOM_GATES();
+		}
+	}
+
+	function finishInitialization() {
+		if (pageRevealed) return;
+		clearTimeout(safetyTimer);
+		applyStatsigGates();
 		revealPage();
+	}
+
+	// Wait for fresh values (not just cache) before first reveal.
+	statsigClient.on('values_updated', function(evt) {
+		if (evt && evt.status === 'Ready') {
+			finishInitialization();
+		}
+	});
+
+	var safetyTimer = setTimeout(function() {
+		if (!pageRevealed) {
+			applyStatsigGates();
+			revealPage();
+		}
+	}, 8000);
+
+	window.__statsigReady = statsigClient.initializeAsync({ timeoutMs: 8000 }).then(function() {
+		if (statsigClient.loadingStatus === 'Ready') {
+			finishInitialization();
+		}
 	}, function() {
 		clearTimeout(safetyTimer);
+		window.__CP_GATES = {};
 		revealPage();
 	});
 })();
 </script>
-<!-- End Statsig SDK -->
-		<meta name="google-site-verification" content="FPm2dPKx77pTd0CoT1IxY19bd3XXZ3zbRDXRTtGvr5k" />
-	</head>
-
-	<body>
-<div id="gate-cover"></div>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NKH9CR8"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -466,34 +513,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			$('#riskpremium-display').text(this.value + '%');
 		});
 
-		// Apply feature gates once Statsig has fetched fresh values.
-		if (window.__statsigReady) {
-			window.__statsigReady.then(function() {
-				if (window.statsigClient) {
-					if (window.statsigClient.checkGate('update_styles_2026')) {
-						document.documentElement.classList.add('design-2026');
-					}
-				}
-				if (window.statsigClient && window.statsigClient.checkGate('dark_mode')) {
-					window.__darkModeEnabled = true;
-					initThemeToggle();
-				}
-				if (window.statsigClient && window.statsigClient.checkGate('risk_premium')) {
-					window.__riskPremiumEnabled = true;
-					var toggle = document.getElementById('settings-toggle');
-					var wrap = document.getElementById('settings-fieldset-wrap');
-					var riskSection = document.getElementById('risk-premium-section');
-					toggle.style.display = 'block';
-					riskSection.style.display = 'block';
-					wrap.style.display = 'none';
-					toggle.addEventListener('click', function() {
-						var open = wrap.style.display !== 'none';
-						wrap.style.display = open ? 'none' : 'block';
-						this.setAttribute('aria-expanded', String(!open));
-						this.querySelector('.settings-chevron').textContent = open ? '\u25bc' : '\u25b2';
-					});
-				}
-			});
+		// DOM updates for gates (evaluated once in head after initializeAsync).
+		window.__CP_APPLY_DOM_GATES = function() {
+			var gates = window.__CP_GATES;
+			if (!gates) return;
+
+			if (gates.dark_mode) {
+				initThemeToggle();
+			}
+			if (gates.risk_premium) {
+				window.__riskPremiumEnabled = true;
+				var toggle = document.getElementById('settings-toggle');
+				var wrap = document.getElementById('settings-fieldset-wrap');
+				var riskSection = document.getElementById('risk-premium-section');
+				toggle.style.display = 'block';
+				riskSection.style.display = 'block';
+				wrap.style.display = 'none';
+				toggle.addEventListener('click', function() {
+					var open = wrap.style.display !== 'none';
+					wrap.style.display = open ? 'none' : 'block';
+					this.setAttribute('aria-expanded', String(!open));
+					this.querySelector('.settings-chevron').textContent = open ? '\u25bc' : '\u25b2';
+				});
+			}
+		};
+
+		if (window.__CP_GATES) {
+			window.__CP_APPLY_DOM_GATES();
+		} else if (window.__statsigReady) {
+			window.__statsigReady.then(window.__CP_APPLY_DOM_GATES);
 		}
 		</script>
 	</body>
