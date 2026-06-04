@@ -37,13 +37,6 @@
 				document.documentElement.classList.toggle('dark-mode', theme === 'dark');
 				document.documentElement.setAttribute('data-color-scheme', theme);
 			};
-
-			// Apply last-known design gate immediately so returning users don't flash legacy UI.
-			try {
-				if (sessionStorage.getItem('cp.gate.update_styles_2026') === '1') {
-					document.documentElement.classList.add('design-2026');
-				}
-			} catch (e) {}
 		})();
 		</script>
 
@@ -79,19 +72,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-NKH9CR8');</script>
 <!-- End Google Tag Manager -->
-<!-- Statsig SDK (init runs after #gate-cover in body) -->
+<!-- Statsig SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@statsig/js-client@3/build/statsig-js-client+session-replay+web-analytics.min.js"></script>
 <script src="js/statsig-key.js"></script>
-<!-- End Statsig SDK -->
-		<meta name="google-site-verification" content="FPm2dPKx77pTd0CoT1IxY19bd3XXZ3zbRDXRTtGvr5k" />
-	</head>
-
-	<body>
-<div id="gate-cover"></div>
 <script>
 (function() {
 	var _s = window.Statsig;
-	var DESIGN_GATE_CACHE = 'cp.gate.update_styles_2026';
 
 	var STABLE_ID_KEY = 'cp.stable_id';
 	var stableID = localStorage.getItem(STABLE_ID_KEY);
@@ -111,15 +97,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 	_s.runStatsigAutoCapture(statsigClient);
 	window.statsigClient = statsigClient;
 
-	var pageRevealed = false;
-
-	function revealPage() {
-		var cover = document.getElementById('gate-cover');
-		if (cover) cover.parentNode.removeChild(cover);
-		pageRevealed = true;
-	}
+	var gatesChecked = false;
 
 	function applyStatsigGates() {
+		if (gatesChecked) return;
+		gatesChecked = true;
+
 		var gates = {
 			update_styles_2026: statsigClient.checkGate('update_styles_2026'),
 			dark_mode: statsigClient.checkGate('dark_mode'),
@@ -129,13 +112,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 		if (gates.update_styles_2026) {
 			document.documentElement.classList.add('design-2026');
-		} else {
-			document.documentElement.classList.remove('design-2026');
 		}
-		try {
-			sessionStorage.setItem(DESIGN_GATE_CACHE, gates.update_styles_2026 ? '1' : '0');
-		} catch (e) {}
-
 		if (gates.dark_mode && window.__CP_APPLY_THEME_CLASS && window.__CP_RESOLVE_THEME) {
 			window.__darkModeEnabled = true;
 			window.__CP_APPLY_THEME_CLASS(window.__CP_RESOLVE_THEME());
@@ -145,38 +122,45 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		}
 	}
 
-	function finishInitialization() {
-		if (pageRevealed) return;
-		clearTimeout(safetyTimer);
-		applyStatsigGates();
-		revealPage();
+	function revealPage() {
+		var cover = document.getElementById('gate-cover');
+		if (cover) cover.parentNode.removeChild(cover);
 	}
 
-	// Wait for fresh values (not just cache) before first reveal.
-	statsigClient.on('values_updated', function(evt) {
-		if (evt && evt.status === 'Ready') {
-			finishInitialization();
+	function whenGateCoverReady(fn) {
+		if (document.getElementById('gate-cover')) {
+			fn();
+		} else {
+			document.addEventListener('DOMContentLoaded', fn);
 		}
-	});
+	}
 
-	var safetyTimer = setTimeout(function() {
-		if (!pageRevealed) {
+	function finishWithGates() {
+		clearTimeout(safetyTimer);
+		whenGateCoverReady(function() {
 			applyStatsigGates();
 			revealPage();
-		}
-	}, 8000);
+		});
+	}
 
-	window.__statsigReady = statsigClient.initializeAsync({ timeoutMs: 8000 }).then(function() {
-		if (statsigClient.loadingStatus === 'Ready') {
-			finishInitialization();
-		}
-	}, function() {
+	function finishWithoutGates() {
 		clearTimeout(safetyTimer);
 		window.__CP_GATES = {};
-		revealPage();
-	});
+		whenGateCoverReady(revealPage);
+	}
+
+	// Fallback only: reveal default UI without calling checkGate (avoids stale-cache evaluations).
+	var safetyTimer = setTimeout(finishWithoutGates, 5000);
+
+	window.__statsigReady = statsigClient.initializeAsync().then(finishWithGates, finishWithoutGates);
 })();
 </script>
+<!-- End Statsig SDK -->
+		<meta name="google-site-verification" content="FPm2dPKx77pTd0CoT1IxY19bd3XXZ3zbRDXRTtGvr5k" />
+	</head>
+
+	<body>
+<div id="gate-cover"></div>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NKH9CR8"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
