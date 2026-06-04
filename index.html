@@ -163,7 +163,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 					<div class="span7">
 						<fieldset id="main-fields">
 							<legend>Type in the number you have</legend>
-							<div id="premium-col-head" style="display:none">
+							<div id="premium-col-head">
 								<div class="premium-col-head-spacer"></div>
 								<div class="premium-col-head-label">With <span id="risk-pct-label">0%</span> risk premium</div>
 							</div>
@@ -402,14 +402,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 						$('#annualinc_premium').val(format((unformat($('#annualinc').val()) * riskMultiplier).toFixed(0)));
 						$('#dailypremium').val(format((rawDaily * riskMultiplier).toFixed(0)));
 						$('#risk-pct-label').text(riskPct + '%');
-						$('.premium-input').show();
 						$('.input-with-premium').addClass('showing-premium');
-						$('#premium-col-head').show();
+						$('#premium-col-head').addClass('is-visible');
 					} else {
 						$('#annualex_premium,#annualinc_premium,#dailypremium').val('');
-						$('.premium-input').hide();
 						$('.input-with-premium').removeClass('showing-premium');
-						$('#premium-col-head').hide();
+						$('#premium-col-head').removeClass('is-visible');
 					}
 				}
 				savePrefs();
