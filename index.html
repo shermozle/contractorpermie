@@ -376,6 +376,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			}
 		}
 
+		function initSettingsToggle() {
+			var toggle = document.getElementById('settings-toggle');
+			if (!toggle || toggle.getAttribute('data-settings-toggle-ready') === 'true') return;
+
+			toggle.setAttribute('data-settings-toggle-ready', 'true');
+			var wrap = document.getElementById('settings-fieldset-wrap');
+			var riskSection = document.getElementById('risk-premium-section');
+			toggle.style.display = 'block';
+			riskSection.style.display = 'block';
+			wrap.style.display = 'none';
+			toggle.addEventListener('click', function() {
+				var open = wrap.style.display !== 'none';
+				wrap.style.display = open ? 'none' : 'block';
+				this.setAttribute('aria-expanded', String(!open));
+				this.querySelector('.settings-chevron').textContent = open ? '\u25bc' : '\u25b2';
+			});
+		}
+
 		function initThemeToggle() {
 			var toggle = document.getElementById('theme-toggle');
 			if (!toggle || toggle.getAttribute('data-theme-toggle-ready') === 'true') return;
@@ -543,18 +561,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 			}
 			if (gates.risk_premium) {
 				window.__riskPremiumEnabled = true;
-				var toggle = document.getElementById('settings-toggle');
-				var wrap = document.getElementById('settings-fieldset-wrap');
-				var riskSection = document.getElementById('risk-premium-section');
-				toggle.style.display = 'block';
-				riskSection.style.display = 'block';
-				wrap.style.display = 'none';
-				toggle.addEventListener('click', function() {
-					var open = wrap.style.display !== 'none';
-					wrap.style.display = open ? 'none' : 'block';
-					this.setAttribute('aria-expanded', String(!open));
-					this.querySelector('.settings-chevron').textContent = open ? '\u25bc' : '\u25b2';
-				});
+				initSettingsToggle();
 			}
 		};
 
